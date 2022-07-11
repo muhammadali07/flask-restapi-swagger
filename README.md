@@ -1,2 +1,2 @@
-# flask-restfullapi-swagger
-flask-restfullapi-swagger
+# flask-restapi-swagger
+flask-restapi-swagger
