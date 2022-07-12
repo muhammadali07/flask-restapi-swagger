@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 from flask import jsonify, abort, request, Blueprint
 
-REQUEST_API = Blueprint('request_api', __name__)
+REQUEST_API = Blueprint('product', __name__)
 
 
 def get_blueprint():
@@ -13,7 +13,7 @@ data = {
     "nama":"muh ali bakhtiar"
 }
 
-@REQUEST_API.route('/request', methods=['GET'])
+@REQUEST_API.route("/get-data-prod", methods=['GET'])
 def get_records():
     """Return all book requests
     @return: 200: an array of all known BOOK_REQUESTS as a \

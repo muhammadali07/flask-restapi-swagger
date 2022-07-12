@@ -35,7 +35,7 @@
               }
             }
           }
-        },
+          },
         "post": {
           "tags": [
             "Book Request"
@@ -179,6 +179,22 @@
             },
             "404": {
               "description": "Failed. Book Request not found."
+            }
+          }
+        }
+      }
+    },
+    "product_path":{
+      "/get-data-prod": {
+        "get":{
+          "tags":[
+            "Product Request"
+          ],
+          "summary":"Get Data Product",
+          "responses":{
+            "200":{
+              "description":"OK",
+              "schema":""
             }
           }
         }

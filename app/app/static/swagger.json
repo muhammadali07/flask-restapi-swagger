@@ -1,0 +1,99 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "description": "Muh Ali Bakhtiar",
+      "version": "1.0.0",
+      "title": "Flask Resfull API Swagger",
+      "license": {
+        "name": "MAB",
+        "url": ""
+      }
+    },
+    "servers": [
+      {
+        "url": "/"
+      }
+    ],
+    "tags": [
+      {
+        "name": "Produk API",
+        "description": "Example API for requesting and return book requests"
+      }
+    ],
+    "paths":{
+      "/get-data-prod": {
+        "get":{
+          "tags":[
+            "Get Product Request"
+          ],
+          "summary":"Get Data",
+          "responses":{
+            "200":{
+              "description":"OK",
+              "schema":{
+                "$ref": "#/components/schemas/ProductList"
+              }
+            },
+            "404":{
+              "description": "NOT FOUND",
+              "schema": {
+              "$ref": "#/components/schemas/ProductList"
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "id": {
+          "properties": {
+            "uuid": {
+              "type": "string"
+            }
+          }
+        },
+        "ProductList": {
+          "type": "object",
+          "properties": {
+            "nama": {
+              "type": "string",
+              "format": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        },
+        "bookRequest": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "format": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "number"
+            }
+          }
+        },
+        "bookRequests": {
+          "type": "object",
+          "properties": {
+            "bookRequest": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/components/schemas/bookRequest"
+              }
+            }
+          }
+        }
+      }
+    }
+  }

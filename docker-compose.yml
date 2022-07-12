@@ -1,46 +1,41 @@
-# version: '3.9'
-
-# services:
-#   db:
-#     container_name: flask-db
-#     image: mysql:8
-#     ports:
-#       - 3306:3306
-#     volumes:
-#       - ~/apps/mysql:/var/lib/mysql
-#     environment:
-#       # - MYSQL_ROOT_PASSWORD=root
-#       - MYSQL_PASSWORD=root
-#       - MYSQL_USER=flask_user
-#       - MYSQL_DATABASE=flask_dev
-# volumes:
-#   db:
-#     driver: local
-
-
 version: '3.8'
 services:
+  api:
+    build:
+      context: ./app/app
+      dockerfile: Dockerfile
+    container_name: flask-api
+    restart: always
+    ports:
+    - "5001:5000"
+    volumes:
+    - ./app/app:/app
+    links:
+    - db
+    networks: 
+      - flask_network
+
   db:
     image: mysql:5.7
     container_name: flask-db
     restart: always
     environment:
       MYSQL_DATABASE: 'db'
-      # So you don't have to use root, but you can if you like
       MYSQL_USER: 'user'
-      # You can use whatever password you like
       MYSQL_PASSWORD: 'password'
-      # Password for root access
       MYSQL_ROOT_PASSWORD: 'password'
     ports:
-      # <Port exposed> : < MySQL Port running inside container>
       - '3306:3306'
     expose:
-      # Opens port 3306 on the container
       - '3306'
-      # Where our data will be persisted
     volumes:
       - my-db:/var/lib/mysql
-# Names our volume
+    networks: 
+      - flask_network
+
 volumes:
   my-db:
+
+networks: 
+  flask_network:
+    name: flask_network
