@@ -10,7 +10,7 @@ warnings.simplefilter("ignore", category=sa_exc.SAWarning)
 
 # creates an instance of AsyncEngine which then offers an async version
 engine = create_async_engine(
-    settings.SQLALCHEMY_WITH_DRIVER_URI,
+    settings.SQLALCHEMY_DATABASE_URI,
     echo=False, # set it to True if you wanna know what sqlalchemy did
     pool_size=100,
     max_overflow=200,

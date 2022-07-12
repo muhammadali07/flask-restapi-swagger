@@ -1,7 +1,7 @@
-"""A Python Flask REST API (CRUD)"""
-
 import argparse
-import logging
+import threading
+import time
+import asyncio
 import os
 from flask import Flask, jsonify, make_response
 from flask_cors import CORS
@@ -11,12 +11,12 @@ from api import (
     product
 )
 from db import engine, Base
+from config import settings
 
 app = Flask(__name__)
 
-# engine = create_engine('mysql+mysqldb://scott:tiger@localhost/db')
-# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://scott:tiger@localhost/db"
-# app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# app.config['SQLALCHEMY_DATABASE_URI'] = settings.SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 SWAGGER_URL = '/swagger'
 API_URL = '/static/swagger.json'
@@ -35,12 +35,39 @@ app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 
 app.register_blueprint(product.get_blueprint())
 
+@app.before_first_request
+def activate_job():
+    def run_job():
+        while True:
+            print("Run recurring task")
+            time.sleep(3)
+
+    thread = threading.Thread(target=run_job)
+    thread.start()
+
 
 async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        db.create_all()
 
+def start_runner():
+    def start_loop():
+        not_started = True
+        while not_started:
+            print('In start loop')
+            try:
+                r = asyncio.run(startup())
+                if r.status_code == 200:
+                    print('Server started, quiting start_loop')
+                    not_started = False
+                print(r.status_code)
+            except:
+                print('Server not yet started')
+            time.sleep(2)
+
+    print('Started runner')
+    thread = threading.Thread(target=start_loop)
+    thread.start()
 
 @app.errorhandler(400)
 def handle_400_error(_error):
@@ -68,6 +95,8 @@ def handle_500_error(_error):
 
 if __name__ == '__main__':
 
+    asyncio.run(startup())
+
     PARSER = argparse.ArgumentParser(
         description="Flask Restfull API")
 
@@ -80,7 +109,6 @@ if __name__ == '__main__':
     if ARGS.debug:
         print("Running in debug mode")
         CORS = CORS(app)
-        startup()
         app.run(host='0.0.0.0', port=PORT, debug=True)
     else:
         app.run(host='0.0.0.0', port=PORT, debug=False)

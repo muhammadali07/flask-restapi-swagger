@@ -5,36 +5,41 @@ services:
       context: ./app/app
       dockerfile: Dockerfile
     container_name: flask-api
-    restart: always
+    restart: unless-stopped
     ports:
     - "5001:5000"
     volumes:
     - ./app/app:/app
     links:
-    - db
+    - mysql-db
+    depends_on:
+    - mysql-db
     networks: 
       - flask_network
 
-  db:
+  mysql-db:
     image: mysql:5.7
     container_name: flask-db
-    restart: always
+    restart: unless-stopped
     environment:
-      MYSQL_DATABASE: 'db'
-      MYSQL_USER: 'user'
-      MYSQL_PASSWORD: 'password'
-      MYSQL_ROOT_PASSWORD: 'password'
+      MYSQL_DB: ${MYSQL_DB_SERVER?Variable not set}
+      MYSQL_USER: ${MYSQL_DB_API_USER?Variable not set}
+      MYSQL_PASSWORD: ${MYSQL_DB_API_PASSWORD?Variable not set}
+      MYSQL_DB_API: ${MYSQL_DB_API?Variable not set}
+      MYSQL_DB_API_USER: ${MYSQL_DB_API_USER?Variable not set}
+      MYSQL_DB_API_PASSWORD: ${MYSQL_DB_API?Variable not set}
+      TZ: "Asia/Jakarta" # Add timezone
     ports:
-      - '3306:3306'
-    expose:
-      - '3306'
+      - ${MYSQL_DB_EXPOSE_PORT?Variable not set}:${MYSQL_DB_PORT?Variable not set}
     volumes:
-      - my-db:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
+      - ./files:/files
     networks: 
       - flask_network
 
 volumes:
-  my-db:
+  mysql_data:
+    driver: local
 
 networks: 
   flask_network:
