@@ -3,6 +3,8 @@ import threading
 import time
 import asyncio
 import os
+from asyncmy import connect
+from asyncmy.cursors import DictCursor
 from flask import Flask, jsonify, make_response
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -15,7 +17,7 @@ from config import settings
 
 app = Flask(__name__)
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = settings.SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_DATABASE_URI'] = settings.SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 SWAGGER_URL = '/swagger'
@@ -45,29 +47,11 @@ def activate_job():
     thread = threading.Thread(target=run_job)
     thread.start()
 
-
-async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-def start_runner():
-    def start_loop():
-        not_started = True
-        while not_started:
-            print('In start loop')
-            try:
-                r = asyncio.run(startup())
-                if r.status_code == 200:
-                    print('Server started, quiting start_loop')
-                    not_started = False
-                print(r.status_code)
-            except:
-                print('Server not yet started')
-            time.sleep(2)
-
-    print('Started runner')
-    thread = threading.Thread(target=start_loop)
-    thread.start()
+async def run():
+    conn = await connect()
+    async with conn.cursor(cursor=DictCursor) as cursor:
+        await cursor.execute("create database if not exists test")
+        await cursor.execute(Base.metadata.create_all)
 
 @app.errorhandler(400)
 def handle_400_error(_error):
@@ -95,7 +79,7 @@ def handle_500_error(_error):
 
 if __name__ == '__main__':
 
-    asyncio.run(startup())
+    asyncio.run(run())
 
     PARSER = argparse.ArgumentParser(
         description="Flask Restfull API")

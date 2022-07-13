@@ -7,35 +7,67 @@ services:
     container_name: flask-api
     restart: unless-stopped
     ports:
-    - "5001:5000"
+      - "5001:5000"
     volumes:
-    - ./app/app:/app
+      - ./app/app:/app
+      - ./data:/docker-entrypoint-initdb.d
     links:
-    - mysql-db
+      - db:db
     depends_on:
-    - mysql-db
+      - db
     networks: 
       - flask_network
 
-  mysql-db:
-    image: mysql:5.7
+  db:
+    image: mysql:8.0
     container_name: flask-db
     restart: unless-stopped
+    tty: true
     environment:
-      MYSQL_DB: ${MYSQL_DB_SERVER?Variable not set}
-      MYSQL_USER: ${MYSQL_DB_API_USER?Variable not set}
-      MYSQL_PASSWORD: ${MYSQL_DB_API_PASSWORD?Variable not set}
-      MYSQL_DB_API: ${MYSQL_DB_API?Variable not set}
-      MYSQL_DB_API_USER: ${MYSQL_DB_API_USER?Variable not set}
-      MYSQL_DB_API_PASSWORD: ${MYSQL_DB_API?Variable not set}
-      TZ: "Asia/Jakarta" # Add timezone
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+      TZ: "Asia/Jakarta"
     ports:
-      - ${MYSQL_DB_EXPOSE_PORT?Variable not set}:${MYSQL_DB_PORT?Variable not set}
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      # - mysql_data:/app/mysql_data
       - ./files:/files
     networks: 
       - flask_network
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    hostname: pma
+    links:
+      - db:db
+    ports:
+      - 8000:80
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    networks: 
+      - flask_network
+
+  apache:
+      container_name: apache
+      image: 'bitnami/apache:latest'
+      ports:
+        - '8778:80'
+        - '443:8443'
+      volumes:
+        - /path/to/app:/app 
+      links: 
+        - db:db
+        - phpmyadmin:phpmyadmin
+      networks: 
+        - flask_network
 
 volumes:
   mysql_data:

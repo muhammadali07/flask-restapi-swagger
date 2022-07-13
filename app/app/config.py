@@ -4,16 +4,14 @@ from pydantic import (
     validator,
 )
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 class Settings(BaseSettings):
-    MYSQL_DB_SERVER: str = os.getenv('MYSQL_DB_SERVER')
-    MYSQL_DB_API_USER: str = os.getenv('MYSQL_DB_API_USER')
-    MYSQL_DB_API_PASSWORD: str = os.getenv('MYSQL_DB_API_PASSWORD')
-    MYSQL_DB_API: str = os.getenv('MYSQL_DB_API')
 
+    MYSQL_DB_SERVER: str = "db"
+    MYSQL_DB_API_USER: str = "flaskusr"
+    MYSQL_DB_API_PASSWORD: str = "flaskpass"
+    MYSQL_DB_API: str = "flaskdb"
+    
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
     
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
@@ -28,10 +26,10 @@ class Settings(BaseSettings):
         password = values.get("MYSQL_DB_API_PASSWORD")
         host = values.get("MYSQL_DB_SERVER")
         database = values.get("MYSQL_DB_API")
-        return "{}+{}://{}:{}@{}/{}".format(scheme, driver, user, password, host, database)
-        # conn = f'{scheme}+{driver}://{user}:{password}@{host}/{database}'
-        # print(conn)
-        # return conn
-
+        port = "3306"
+        conmy = "{}+{}://{}:{}@{}/{}?charset=utf8mb4".format(scheme,driver, user,password,host, database)
+        print(conmy)
+        return conmy
+    print(f"connect:{SQLALCHEMY_DATABASE_URI}")
 
 settings = Settings()
