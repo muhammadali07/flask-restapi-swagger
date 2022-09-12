@@ -18,24 +18,24 @@ services:
     networks: 
       - flask_network
 
-  db:
+  flask-keycloak-db:
     image: mysql:8.0
     container_name: flask-db
     restart: unless-stopped
     tty: true
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB_API}
+      MYSQL_USER: ${MYSQL_DB_API_USER}
+      MYSQL_PASSWORD: ${MYSQL_DB_API_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_DB_ROOT_PASSWORD}
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
       TZ: "Asia/Jakarta"
     ports:
       - "3306:3306"
     volumes:
+      - ./data/mysql:/docker-entrypoint-initdb.d
       - mysql_data:/var/lib/mysql
-      # - mysql_data:/app/mysql_data
       - ./files:/files
     networks: 
       - flask_network
@@ -49,9 +49,9 @@ services:
     ports:
       - 8000:80
     environment:
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_DB_API_USER}
+      MYSQL_PASSWORD: ${MYSQL_DB_API_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_DB_ROOT_PASSWORD}
     networks: 
       - flask_network
 
